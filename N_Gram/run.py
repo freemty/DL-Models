@@ -21,16 +21,20 @@ def loadData(FileName , low_threshold = 10 , high_freq_threshold = 0.85):
     high_freq = 1e-3
     wordCounter = Counter(text)
     totalCount = len(text)
-    wordFreq = {word : (1 - math.sqrt(high_freq / (count / totalCount)) for word,count in wordCounter.items()}
+    wordFreq = {word : (1 - math.sqrt(high_freq / (count / totalCount))) for word , count in wordCounter.items()}
     text = [word for word in text if wordFreq[word] < high_freq_threshold]
 
     vocab = set(text)
     vocab_List = list(vocab)
 
     word2Int = {word : index for index , word in enumerate(vocab_List)}
-    int2word = {index : word for index , word in enumerate(vocab_List)}
+    int2Word = {index : word for index , word in enumerate(vocab_List)}
     encode = {word2Int[word] for word in text}
+
+
     return vocab , word2Int ,int2Word , encode
 
 
+
 vocab , word2Int , int2Word , encode = loadData('data/text')
+print('Done!')
