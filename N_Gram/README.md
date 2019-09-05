@@ -55,3 +55,7 @@ for index , word in enumerate(list1):
 1 dog
 2 tiger
 ```
+
+#### yield
+
+生成器

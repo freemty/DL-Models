@@ -3,7 +3,7 @@ import tensorflow as tf
 from model import Model
 
 
-class Skip_Gram(Model):
+class Skip_Gram(Model , text , window_size):
 
 
 
@@ -13,8 +13,35 @@ class Skip_Gram(Model):
 
 
     def get_batch(self , ):
+
         
         return 
+
+    def get_windows_word(self , text , word_id , window_size):
+        start = word_id - word_size if word_id - word_size >=0 else 0
+        end = word_id + word_size if word_id + word_size > len(text) else (len(text) - 1)
+        window_word = set(text[start : word_id] + text[word_id + 1 : end + 1] )
+        return list(window_word)
+
+    def get_batch(self , text , window_size , batch_size):
+
+        x , y = [] , []
+
+        for id in range(len(text)):
+            window_word = self.get_windows_word(text , id , window_size)
+            x.extend([text[id]] * len(window_word))
+            y.extend(window_word)
+
+         '''
+        combine = list(zip(x, y))
+        random.shuffle(combine)
+        x[:], y[:] = zip(*combine)
+        '''
+
+        n_batch = len(text) // batch_size
+        text = text[ : n_batch * batch_size]
+
+
 
     def create_feed_dict(self , input_batch , label_batch):
 
@@ -43,6 +70,8 @@ class Skip_Gram(Model):
 
     def run_epopch(self):
 
+
+
     def fit(self):
         losses = []
 
@@ -56,5 +85,4 @@ class Skip_Gram(Model):
 
 
     def __init__ (self):
-            self.config = config()
             self.build()

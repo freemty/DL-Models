@@ -1,10 +1,14 @@
-#import SG_Model
+
 import time
 import string
 import math
 from collections import Counter
 import numpy as np 
 import tensorflow as tf 
+from SG_Model import Skip_Gram
+
+class Config(object):
+
 
 
 def loadData(FileName , low_threshold = 10 , high_freq_threshold = 0.85):
@@ -14,16 +18,16 @@ def loadData(FileName , low_threshold = 10 , high_freq_threshold = 0.85):
     for i in string.punctuation:
         text = text.replace(i , ' ')
     text = text.split()
-    #去高频
+    #去低频
     wordCounter = Counter(text)
     text = [word for word in text if wordCounter[word] >= low_threshold]
-
+    #去高频
     high_freq = 1e-3
     wordCounter = Counter(text)
     totalCount = len(text)
     wordFreq = {word : (1 - math.sqrt(high_freq / (count / totalCount))) for word , count in wordCounter.items()}
     text = [word for word in text if wordFreq[word] < high_freq_threshold]
-
+    #生成字典
     vocab = set(text)
     vocab_List = list(vocab)
 
@@ -34,7 +38,26 @@ def loadData(FileName , low_threshold = 10 , high_freq_threshold = 0.85):
 
     return vocab , word2Int ,int2Word , encode
 
+def get_batch():
+
+    return 
 
 
-vocab , word2Int , int2Word , encode = loadData('data/text')
-print('Done!')
+if __name__ == '__main__':
+
+    vocab , word2Int , int2Word , encode = loadData('data/text')
+
+    config = Config()
+
+
+    with tf.Graph().as_default() as graph:
+        model = Skip_Gram(config)
+        init_op = tf.global_variables_initializer()
+
+    graph.finalize()
+
+    with tf.Session(graph=graph) as sess:
+        sess.run(init_op)
+
+
+    print('Done!')
