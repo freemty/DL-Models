@@ -78,7 +78,11 @@ class Skip_Gram(Model):
         for epoch in range(self.config.epochs)：
             for x , y in self.get_batch(self.config.text , self.config.window_size , self.config.batch_size)
 
-
+    def build(self):
+        self.add_placeholders()
+        self.pred = self.add_prediction_op()
+        self.loss = self.add_loss_op(self.pred)
+        self.train_op = self.add_training_op(self.loss)
     
 
     def __init__ (self , config):

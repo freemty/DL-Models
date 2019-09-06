@@ -59,9 +59,11 @@ if __name__ == '__main__':
     config.int2Word = int2Word
 
     with tf.Graph().as_default() as graph:
+        start = time.time()
         model = Skip_Gram(config)
         init_op = tf.global_variables_initializer()
-
+        
+        print "took {:.2f} seconds\n".format(time.time() - start)
     graph.finalize()
 
     with tf.Session(graph=graph) as sess:
