@@ -25,7 +25,7 @@
 这部分的第一次接触是在CS224n Assignment 里tf的抽象层Model的写法
 对于类继承比较详细的解释在[这里](https://www.liaoxuefeng.com/wiki/1016959663602400/1017497232674368)
 
-#### set（）
+#### set( )
 
 set（）可创建集合
 本次用于list去重
@@ -40,7 +40,7 @@ print(list1 , set1)
 ['hello', 'hello', 'bye'] {'bye', 'hello'}
 ```
 
-#### emuneart()
+#### emuneart( )
 
 迭代器,将一个可遍历的数据对象组合为一个索引序列，同时列出数据和索引
 
@@ -59,3 +59,5 @@ for index , word in enumerate(list1):
 #### yield
 
 生成器
+
+详述链接[这里](https://www.ibm.com/developerworks/cn/opensource/os-cn-python-yield/index.html)

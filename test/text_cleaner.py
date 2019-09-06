@@ -3,6 +3,13 @@ import string
 import math
 from collections import Counter
 
+class Config(object):
+    epochs = 10
+    embedding_size = 300
+    windows_size = 5
+    batch_size = 100
+    text = None
+
 
 fileName = 'Harry_Potter1-7.txt'
 low_threshold = 10
@@ -20,8 +27,6 @@ new.write(text)
 
 text = text.split()
 
-#删除频率小于10的低频次
- #过于低频的词会造成一些干扰
 wordCount = Counter(text)
 text = [word for word in text if wordCount[word] >= low_threshold]
 high_freq = 1e-3
@@ -50,6 +55,9 @@ for i in range(100):
 #对文本进行编码
 encode = [word2Int[word] for word in text]
 
-encode.save('1')
+config = Config()
 
+config.text = encode
+
+print(config.text)
 print('Done!')

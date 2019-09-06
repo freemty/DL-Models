@@ -8,7 +8,16 @@ import tensorflow as tf
 from SG_Model import Skip_Gram
 
 class Config(object):
-
+    #超参数
+    epochs = 10
+    embedding_size = 300
+    windows_size = 5
+    batch_size = 100
+    n_sample = 100
+    #文本数据
+    text = None
+    vocab_size = None
+    int2Word = None
 
 
 def loadData(FileName , low_threshold = 10 , high_freq_threshold = 0.85):
@@ -38,9 +47,6 @@ def loadData(FileName , low_threshold = 10 , high_freq_threshold = 0.85):
 
     return vocab , word2Int ,int2Word , encode
 
-def get_batch():
-
-    return 
 
 
 if __name__ == '__main__':
@@ -48,7 +54,9 @@ if __name__ == '__main__':
     vocab , word2Int , int2Word , encode = loadData('data/text')
 
     config = Config()
-
+    config.text = encode
+    config.vocab_size = len(vocab)
+    config.int2Word = int2Word
 
     with tf.Graph().as_default() as graph:
         model = Skip_Gram(config)
