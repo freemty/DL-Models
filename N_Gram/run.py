@@ -14,6 +14,7 @@ class Config(object):
     windows_size = 5
     batch_size = 100
     n_sample = 100
+    valid_size = 16
     #文本数据
     text = None
     vocab_size = None
@@ -62,12 +63,14 @@ if __name__ == '__main__':
         start = time.time()
         model = Skip_Gram(config)
         init_op = tf.global_variables_initializer()
-        
+
         print "took {:.2f} seconds\n".format(time.time() - start)
     graph.finalize()
 
     with tf.Session(graph=graph) as sess:
         sess.run(init_op)
+        model.fit(sess , )
+
 
 
     print('Done!')
