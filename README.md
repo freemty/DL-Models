@@ -5,12 +5,10 @@
     机器学习
     《统计学习方法》里每一章的算法
 
-
-    深度学习
+    深度学习基本模型
     MLP,RNN,CNN,LSTM
 
 #### reference
 
     https://github.com/hanbt/learn_dl
     https://github.com/Dod-o/Statistical-Learning-Method_Code
-

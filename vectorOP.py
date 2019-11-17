@@ -4,7 +4,6 @@ class VectorOp(object):
 
     @staticmethod
     def dot(x , y):
-
         return reduce(lambda a ,b:a + b,VectorOp.element_multiply(x,y),0.0)
 
     @staticmethod
