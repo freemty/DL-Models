@@ -1,8 +1,12 @@
 import numpy as np 
 
-from activators import Sigmoid
-from abstraction_layer import dl_model 
-from MNIST import MNIST_loader
+import numpy as np 
+import sys
+sys.path.append('../')
+ 
+from Models.activators import Sigmoid
+from Models.abstraction_layer import dl_model 
+from Models.MNIST import MNIST_loader
 
 
 
@@ -126,7 +130,7 @@ def gradicent_check():
     net.gradicent_check(inputs_test,labels_test)
 
 def train_on_mnist():
-    iamges , labels = MNIST_loader()
+    iamges , labels , test_images , test_labels= MNIST_loader()
 
     
 
@@ -139,5 +143,6 @@ def train_on_mnist():
 
 if __name__ == "__main__":
     #model_test()
+    #gradicent_check()
     train_on_mnist()
 

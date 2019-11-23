@@ -14,19 +14,22 @@ class Sigmoid(object):
         return outputs * (1 - outputs)
 class Softmax(object):
     def forward(self,inputs):
-        return 
+        inputs -= np.max(inputs)
+        return np.exp(inputs)/np.sum(np.exp(inputs),axis = 1,keepdims= True)
+
+    def backward(self,outputs):
+        raise NotImplementedError
+
+class Tanh(object):
+    def forward(self,inputs):
+        return 0
 
     def backward(self,outputs):
         return 0
 
-class Tanh(object):
-    def forward(self,inputs):
-        return 
-
-    def backward(self,outputs):
-        return 
-
 
 if __name__ == "__main__":
 
-    print(Sigmoid().forward(5))
+    array1 = np.array([[1,1,3,5],[2,1,4,5]])
+
+    print(Softmax().forward(array1))

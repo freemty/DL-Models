@@ -34,22 +34,42 @@ def MNIST_loader():
         labels_bytes = struct.unpack_from(fmt_label,content,offset)
         labels = np.reshape(labels_bytes,[-1])
 
-    print('Doen!')
+        one_hot = np.zeros([labels_num,10])
+        for i,ids in enumerate(labels):
+            one_hot[i,ids] = 1
+        labels = one_hot
 
-    one_hot = np.zeros([labels_num,10])
-    for i,ids in enumerate(labels):
-        one_hot[i,ids] = 1
-    labels = one_hot
+    with open(test_image_path,'rb') as f:
+        content = f.read()
+        print('loading test_image_set')
+        magic_num,image_num,rows_num,columns_num = struct.unpack_from('>iiii',content,offset = 0)
+        print('magic num:{},images num:{},rows:{},columns:{}'.format(magic_num,image_num,rows_num,columns_num))
 
-    return images,labels
+        image_size = rows_num * rows_num
+        fmt_image = '>'+str(image_num * image_size)+'B'
+        offset = struct.calcsize('>IIII')
+        images_bytes = struct.unpack_from(fmt_image, content ,offset)
+        test_images = np.reshape(images_bytes,[image_num , image_size])
+        f.close()
 
+    with open(test_label_path,'rb') as f:
+        content = f.read()
+        print('loading test_label_set')
+        magic_num,labels_num= struct.unpack_from('>ii',content,offset = 0)
+        print('magic num:{},labels num:{}'.format(magic_num,labels_num))
+        fmt_label = '>' + str(labels_num) + 'B'
+        offset = struct.calcsize('>II')
+        labels_bytes = struct.unpack_from(fmt_label,content,offset)
+        test_labels = np.reshape(labels_bytes,[-1])
+        
+        one_hot = np.zeros([labels_num,10])
+        for i,ids in enumerate(test_labels):
+            one_hot[i,ids] = 1
+        test_labels = one_hot
 
-
+    return images,labels,test_images,test_labels
 
 #print(np.reshape(images[2,:],[28,28]))
-
-
-
 
 
 

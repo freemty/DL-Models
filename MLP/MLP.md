@@ -5,7 +5,7 @@
 
 ### Layer
 
-建立一个单层layer的类,包含的基本成分有input,output,W,b,W    _grad,b_grad,last_delta.
+建立一个单层layer的类,包含的基本成分有input,output,W,b,W_grad,b_grad,last_delta.
 
 #### forward
 

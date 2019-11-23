@@ -8,7 +8,13 @@
     深度学习基本模型
     MLP,RNN,CNN,LSTM
 
-#### reference
+## MLP
+
+基本的多层感知机.
+代码部分参考了[这里](https://www.zybuluo.com/hanbingtao/note/476663)
+第一次手写了全连接层和多层网络,附带grad_check,实现了run on MNIST,虽然很简单,但还是很有成就感的
+
+## reference
 
     https://github.com/hanbt/learn_dl
     https://github.com/Dod-o/Statistical-Learning-Method_Code
