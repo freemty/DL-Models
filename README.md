@@ -6,15 +6,27 @@
     《统计学习方法》里每一章的算法
 
     深度学习基本模型
-    MLP,RNN,CNN,LSTM
+    MLP,RNN,CNN,LSTM...
 
-## MLP
+## 已完成
+
+### ML-Models
+
+### DL-Models
+
+#### MLP
 
 基本的多层感知机.
 代码部分参考了[这里](https://www.zybuluo.com/hanbingtao/note/476663)
 第一次手写了全连接层和多层网络,附带grad_check,实现了run on MNIST,虽然很简单,但还是很有成就感的
 
-## reference
+#### RNN
+
+实现了RNNcell和多层RNN
+代码部分参考了[这里](https://zybuluo.com/hanbingtao/note/541458)
+手推BPTT真的不容易,不过理解确实也深了不少
+
+### reference
 
     https://github.com/hanbt/learn_dl
     https://github.com/Dod-o/Statistical-Learning-Method_Code

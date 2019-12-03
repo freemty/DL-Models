@@ -2,11 +2,10 @@ import numpy as np
 
 import numpy as np 
 import sys
-sys.path.append('../')
- 
-from Models.activators import Sigmoid
-from Models.abstraction_layer import dl_model 
-from Models.MNIST import MNIST_loader
+
+from activators import Sigmoid
+from abstraction_layer import dl_model 
+from MNIST import MNIST_loader
 
 
 

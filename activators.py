@@ -14,9 +14,9 @@ class Sigmoid(object):
         return outputs * (1 - outputs)
 class Softmax(object):
     def forward(self,inputs):
-        inputs -= np.max(inputs)
-        return np.exp(inputs)/np.sum(np.exp(inputs),axis = 1,keepdims= True)
-
+        inputs_sum = np.sum(np.exp(inputs),keepdims= True)
+        output = np.exp(inputs)/inputs_sum
+        return output
     def backward(self,outputs):
         raise NotImplementedError
 
