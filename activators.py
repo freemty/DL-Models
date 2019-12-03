@@ -12,14 +12,15 @@ class Sigmoid(object):
 
     def backward(self,outputs):
         return outputs * (1 - outputs)
+
 class Softmax(object):
     def forward(self,inputs):
         inputs_sum = np.sum(np.exp(inputs),keepdims= True)
-        output = np.exp(inputs)/inputs_sum
-        return output
-    def backward(self,outputs):
-        raise NotImplementedError
+        return np.exp(inputs)/inputs_sum
 
+    def backward(self):
+        raise NotImplementedError
+        
 class Tanh(object):
     def forward(self,inputs):
         return 0
@@ -28,8 +29,14 @@ class Tanh(object):
         return 0
 
 
-if __name__ == "__main__":
+class CE_Softmax(object):
+    def forward(self,inputs,label):
+        '''
+        label必须是onehot
+        '''
+        inputs_sum = np.sum(np.exp(inputs),keepdims= True)
+        pred = np.exp(inputs)/inputs_sum
+        return np.sum(- label * np.log(pred))
 
-    array1 = np.array([[1,1,3,5],[2,1,4,5]])
-
-    print(Softmax().forward(array1))
+    def backward(self,pred,label):
+        return pred - label

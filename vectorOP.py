@@ -8,7 +8,6 @@ class VectorOp(object):
 
     @staticmethod
     def element_multiply(x , y):
-
         return list(map(lambda z : z[0] * z[1], zip(x,y)))
 
     @staticmethod

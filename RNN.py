@@ -38,7 +38,7 @@ class RNNCell(object):
         x = input_word
         self.x_list.append(x)
         state = np.dot(self.We,x) + np.dot(self.Wh,self.states[-1]) + self.b
-        element_wise_op(state , self.activators.forward)
+        state = self.activators.forward(state)
         self.states.append(state)
         return state
 
@@ -69,7 +69,7 @@ class RNNCell(object):
         '''
         self.delta_list = [np.zeros([self.state_size,1]) for i in range(self.times)]
         delta = self.states[-1].copy()
-        element_wise_op(delta,self.activators.backward)
+        delta = self.activators.backward(self.states[-1])
         self.delta_list.append(delta * last_delta)#先把t时刻的delta存进去
         for k in range(self.times - 1,0,-1):
             self.calc_k_delta(k)
@@ -81,11 +81,9 @@ class RNNCell(object):
         k可以理解为t-1
         delta_list[k+1]是文档中t时刻的delta2\n
         state_list[k+1] = z_(t-1) = h_(t)\n
-        np.dot(np.dot(self.delta_list[k+1].T, self.W),np.diag(state[:,0])).T
         '''
         gama = np.dot(self.delta_list[k+1].T,self.Wh)
-        a = self.states[k+1].copy()
-        element_wise_op(a,self.activators.backward)  
+        a = self.activators.backward(self.states[k+1]) 
         k_delta = np.dot(gama,np.diag(a[:,0])).T
         return k_delta
 
@@ -116,10 +114,6 @@ class RNNCell(object):
 
         return We_k_grad,Wh_k_grad,b_k_grad
 
-def element_wise_op(array, op):
-    for i in np.nditer(array,op_flags=['readwrite']):
-        i[...] = op(i)
-
 class RNN(object):
     '''
     DeepRNN
@@ -138,7 +132,7 @@ class RNN(object):
         self.layers = []
         for i in range(layer_num):
             self.layers.append(RNNCell(size[i],size[i+1]))
-        self.states = []
+        self.outputs = []
             
     def train(self,epochs,input_batch,label_batch,learning_rate = 0.01):
 
@@ -158,33 +152,33 @@ class RNN(object):
 
     def Net_forward(self,input_word):
         '''
-        对序列进行一次forward(走一个字儿)
-        return pred,state
+        对序列进行一次forward(只往前走一个字儿)
+
+        return output = Softmax(h_t)
         '''
         output = input_word
 
         for layer in self.layers:
             output = layer.forward(output)
         state = output
-        pred = np.dot(self.U,state) + self.b
-        pred = activators.Softmax().forward(pred)
-        self.states.append(state)
-        return pred
+        z = np.dot(self.U,state) + self.b
+        output = activators.Softmax().forward(z)
+        self.outputs.append(output)
+        return output
 
     def Net_backward(self,pred,label):
         '''
         RNN反传
         '''
-        delta1 = label - pred
-        # CE+softmaxd的反传结果delta1是真的简洁
- 
-        self.U_grad = np.dot(delta1,self.states[-1].T)
+        delta1 = activators.CE_Softmax().backward(pred,label)
+        state = self.layers[-1].states[-1]
+        #求出delta1之后就可以求出全连阶层的梯度
+        self.U_grad = np.dot(delta1,state.T)
         self.b_grad = delta1
-
-        error1 = np.dot(delta1.T,self.U).T
-        error2 = self.layers[-1].activators.backward(self.states[-1])
-        delta2 = error1 * error2
-        delta = delta2
+    
+        delta = np.dot(delta1.T,self.U).T
+        #error2 = self.layers[-1].activators.backward(state)
+        #delta = error1 * error2
         for layer in self.layers[::-1]:
             delta = layer.backward(delta)
 
@@ -196,22 +190,19 @@ class RNN(object):
             layer.update(learning_rate)
     
     def calc_loss(self,pred,label):
-        '''
-        softmax + cross_entropy
-        '''
         #assert labels.shape == preds.shape
-        a = np.log(abs(label-pred))
-        loss = -1 * np.sum(label * a)
+        loss = np.sum(- label * np.log(pred))
         return loss
 
     def reset(self):
         for l in self.layers:
             l.reset()
-        self.states = []
+        self.outputs = []
 
 
-#-----------------------------------------------------------------------------
-#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------#
+#-------------------------------TEST------------------------------------------#
+#-----------------------------------------------------------------------------#
 def RNN_test():
     net = RNN(3,[3,4,4,4,3])
     inputs_batch = [np.random.uniform(-1.0,1,[5,3]) for i in range(10)]
@@ -220,68 +211,98 @@ def RNN_test():
 
 def Cell_grad_check():
     '''
-    写了一天终于成了，干你妈的BPTT
+    写了一天终于成了，cao你妈的BPTT
     '''
+    length = 2
     lc = RNNCell(3,2)
-    x = [np.random.uniform(-1,1,[3,1]) for i in range(10)]
-    for i in range(10):
+    x = [np.random.uniform(-1,1,[3,1]) for i in range(length)]
+    for i in range(length):
         lc.forward(x[i])
   
     sensitivity_array = np.ones([2,1])
     lc.backward(sensitivity_array)
-    epsilon = 10e-4
+    epsilon = 1e-5
 
-    print('for Wh:')
-    for i in range(lc.We.shape[0]):
-        for j in range(lc.We.shape[1]):
-            lc.We[i,j] += epsilon
-            lc.reset()
-            for k in range(10):
-                lc.forward(x[k])
-            error1 = np.sum(lc.states[-1])
-            lc.reset()
-            lc.We[i,j] -= 2 * epsilon
-            for k in range(10):
-                lc.forward(x[k])
-            error2 = np.sum(lc.states[-1])
-            except_grad = (error1 - error2)/(2 * epsilon)
-            lc.We[i,j] += epsilon
-            #reldiff = abs(except_grad - lc.We_grad[i,j]) / max(1, abs(except_grad), abs(lc.We_grad[i,j]))
-            print("We[{},{}]: clac_grad = {}  except_grad = {},".format(i+1,j+1,lc.We_grad[i,j],
-            except_grad))
-    lc.reset()
+    for n , w in enumerate([lc.We,lc.Wh]):
+        print('for {}'.format('We'if n == 0 else 'Wh'))
+        for i in range(w.shape[0]):
+            for j in range(w.shape[1]):
+                w[i,j] += epsilon
+                lc.reset()
+                for k in range(length):
+                    lc.forward(x[k])
+                error1 = np.sum(lc.states[-1])
+                lc.reset()
+                w[i,j] -= 2 * epsilon
+                for k in range(length):
+                    lc.forward(x[k])
+                error2 = np.sum(lc.states[-1])
+                except_grad = (error1 - error2)/(2 * epsilon)
+                w[i,j] += epsilon
+                #reldiff = abs(except_grad - lc.We_grad[i,j]) / max(1, abs(except_grad), abs(lc.We_grad[i,j]))
+                print("W[{},{}]: clac_grad = {}  except_grad = {},".format(i+1,j+1,
+                lc.We_grad[i,j] if n == 0 else lc.Wh_grad[i,j],
+                except_grad))
 
-def net_grad_check():
+
+def Net_grad_check():
+    '''
+    拿头写完的
+    '''
+    length = 2
     nc = RNN(2,[3,4,4,3])
-    x = [np.random.uniform(-1,1,[3,1]) for i in range(2)]
-    label = np.array([0,1,0]).reshape([-1,1])
-    for k in range(2):
+    x = [np.random.uniform(-1,1,[3,1]) for i in range(length)]
+    label = np.array([0,1.0,0]).reshape([-1,1])
+    for k in range(length):
         pred = nc.Net_forward(x[k])
     nc.Net_backward(pred,label)
     epsilon = 1e-4
     #error_func = lambda o: o.sum()
+    print('for U:')
     for i in range(nc.U.shape[0]):
         for j in range(nc.U.shape[1]):
             nc.U[i,j] += epsilon
-            for k in range(2):
+            nc.reset()
+            for k in range(length):
                 pred = nc.Net_forward(x[k])
             error1 = nc.calc_loss(pred,label)
             nc.reset()
-            nc.U[i,j] -= 2 * epsilon
-            for k in range(2):
+            nc.U[i,j] -= (2 * epsilon)
+            for k in range(length):
                 pred = nc.Net_forward(x[k])
             error2 = nc.calc_loss(pred,label)
+
             except_grad = (error1 - error2)/(2 * epsilon)
             nc.U[i,j] += epsilon
 
-            reldiff = abs(except_grad - nc.U_grad[i,j]) / max(1, abs(except_grad), abs(nc.U_grad[i,j]))
-            print("reldiff = {}".format(reldiff))
+            print('except_grad = {},calc_grad = {}'.format(except_grad,nc.U_grad[i,j]))
+    for m , l in enumerate(nc.layers):
+        print('layer:{}'.format(m+1))
+        for n , w in enumerate([l.We,l.Wh]):
+            print('for {}'.format('We'if n == 0 else 'Wh'))
+            for i in range(w.shape[0]):
+                for j in range(w.shape[1]):
+                    w[i,j] += epsilon
+                    nc.reset()
+                    for k in range(length):
+                        pred = nc.Net_forward(x[k])
+                    error1 = nc.calc_loss(pred,label)
+                    nc.reset()
+                    w[i,j] -= (2 * epsilon)
+                    for k in range(length):
+                        pred = nc.Net_forward(x[k])
+                    error2 = nc.calc_loss(pred,label)
+
+                    except_grad = (error1 - error2)/(2 * epsilon)
+                    w[i,j] += epsilon
+                    #reldiff = abs(except_grad - lc.We_grad[i,j]) / max(1, abs(except_grad), abs(lc.We_grad[i,j]))
+                    print("W[{},{}]: clac_grad = {}  except_grad = {},".format(i+1,j+1,
+                    l.We_grad[i,j] if n == 0 else l.Wh_grad[i,j],
+                    except_grad))
 
 
 if __name__ == "__main__":
     #RNN_test()
-    Cell_grad_check()
-    #net_grad_check()
-
-
-
+    
+    #Cell_grad_check()
+    Net_grad_check()
